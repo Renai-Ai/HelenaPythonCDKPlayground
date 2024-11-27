@@ -31,6 +31,7 @@ class PythonCdkStack(Stack):
             code=_lambda.DockerImageCode.from_image_asset("lambda/streaminghello"),
             function_name="StreamingHelloHandler",
             timeout=Duration.minutes(5),
+            architecture=_lambda.Architecture.X86_64,
         )
 
         fn_url = streaming_lambda.add_function_url(

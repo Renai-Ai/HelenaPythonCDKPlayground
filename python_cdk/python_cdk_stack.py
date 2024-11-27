@@ -36,6 +36,11 @@ class PythonCdkStack(Stack):
 
         fn_url = streaming_lambda.add_function_url(
             auth_type=_lambda.FunctionUrlAuthType.NONE,
+            invoke_mode=_lambda.InvokeMode.RESPONSE_STREAM,
         )
 
-        CfnOutput(self, "HelloStreamingLambdaUrl", value=fn_url.url)
+        CfnOutput(
+            self,
+            "HelloStreamingLambdaUrl",
+            value=fn_url.url,
+        )

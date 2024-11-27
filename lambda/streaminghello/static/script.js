@@ -37,16 +37,27 @@ async function tellStory() {
         const text = decoder.decode(value);
         //rawOutput.innerText = text;
         multipleOutputs = text.split('}{');
-        if (multipleOutputs.length === 1) 
-            json = JSON.parse(multipleOutputs[0]);
-        else 
+        if (multipleOutputs.length == 1) {
+            json = JSON.parse(multipleOutputs[0]); 
+            storyOutput.innerText += " " + json.word.trim();
+            percentComplete.innerText = json.percentComplete;
+        } else {
+            json = JSON.parse(multipleOutputs[0] + "}"); 
+            storyOutput.innerText += " " + json.word.trim();
+            percentComplete.innerText = json.percentComplete;
+            for (i = 1; i < multipleOutputs.length - 2; i++) {
+                json = JSON.parse("{" + multipleOutputs[i] + "}");
+                storyOutput.innerText += " " + json.word.trim();
+                percentComplete.innerText = json.percentComplete;
+            }
             json = JSON.parse("{" + multipleOutputs[multipleOutputs.length - 1]);
-        storyOutput.innerText = json.pi;
-        percentComplete.innerText = json.percentComplete;
+            storyOutput.innerText += " " + json.word.trim();
+            percentComplete.innerText = json.percentComplete;
+        }
       }
   
     } catch (error) {
-      errorOutput.innerText = `Sorry, an error happened. Please try again later. \n\n ${error} \n\n ${value}`;
+      errorOutput.innerText = `Sorry, an error happened. Please try again later. \n\n ${error} \n\n ${error.stack}`;
     }
   
   }

@@ -7,43 +7,12 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse, StreamingResponse
 from pydantic import BaseModel
 from typing import Optional
+import random
 import asyncio
 
 app = FastAPI()
 
 app.mount("/demo", StaticFiles(directory="static", html=True))
-
-from decimal import Decimal, getcontext
-
-
-async def pi_chudnovsky(n, update):
-    """
-    Calculates pi using the Chudnovsky formula.
-    """
-
-    getcontext().prec = n + 1  # Set the precision for decimal calculations
-
-    C = Decimal(426880 * Decimal(10005).sqrt())
-    L = Decimal(13591409)
-    X = Decimal(1)
-    M = Decimal(1)
-    K = Decimal(6)
-    S = L
-    result = {}
-    for i in range(1, n):
-        M = (K**3 - 16 * K) * M / (i**3)
-        L += Decimal(545140134)
-        K += Decimal(12)
-        X *= -Decimal(262537412640768000)
-        S += Decimal(M * L) / X
-        if i % update == 0:
-            result["pi"] = str(C / S)
-            result["percentComplete"] = str(i / n * 100)
-            yield json.dumps(result)
-
-    result["pi"] = str(C / S)
-    result["percentComplete"] = str(i / n * 100)
-    yield json.dumps(result)
 
 
 @app.get("/")
@@ -55,28 +24,34 @@ class Story(BaseModel):
     length: Optional[int] = None
 
 
+async def generate_words(length: int):
+    words_list = []
+    with open("words1000.txt", "r") as file:
+        words_list = file.readlines()  # Read the file line by line into a list
+
+    for i in range(length):
+        random_i = random.randint(0, len(words_list) - 1)
+        result = {}
+        result["percentComplete"] = f"{(i + 1) / length * 100}"
+        result["word"] = words_list[random_i]
+        yield json.dumps(result)
+        # await asyncio.sleep(0.1)
+
+
 @app.post("/api/story")
 def api_story(story: Story):
     if story.length == None or story.length == "":
         return None
 
-    return StreamingResponse(pi_chudnovsky(story.length, 1), media_type="text/html")
+    return StreamingResponse(generate_words(story.length), media_type="text/html")
 
 
-@app.post("/2015-03-31/functions/function/invocations")
+@app.post("/events")
 def api_story(story: Story):
-    if story.topic == None or story.topic == "":
+    if story.length == None or story.length == "":
         return None
 
-    return StreamingResponse(pi_chudnovsky(1000, 10), media_type="text/html")
-
-
-async def hello_stream(topic: str):
-
-    for i in range(5):
-        chunk = f"chunk {i} for {topic}\n"
-        yield chunk
-    yield "\n"
+    return StreamingResponse(generate_words(story.length), media_type="text/html")
 
 
 if __name__ == "__main__":

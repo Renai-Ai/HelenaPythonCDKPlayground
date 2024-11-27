@@ -1,9 +1,6 @@
 from constructs import Construct
-from aws_cdk import (
-    Stack,
-    aws_lambda as _lambda,
-    CfnOutput
-)
+from aws_cdk import Stack, aws_lambda as _lambda, CfnOutput, BundlingOptions, Duration
+import os, subprocess
 
 
 class PythonCdkStack(Stack):
@@ -13,17 +10,31 @@ class PythonCdkStack(Stack):
 
         # defines an AWS Lambda resource
         my_lambda = _lambda.Function(
-            self, "HelloHandler",
+            self,
+            "HelloHandler",
             runtime=_lambda.Runtime.PYTHON_3_11,
             handler="hello.handler",
-            code=_lambda.Code.from_asset("lambda"),
-            function_name="HelloHandler"
+            code=_lambda.Code.from_asset("lambda/hello"),
+            function_name="HelloHandler",
         )
 
         fn_url = my_lambda.add_function_url(
-           auth_type=_lambda.FunctionUrlAuthType.NONE,
+            auth_type=_lambda.FunctionUrlAuthType.NONE,
         )
 
-        CfnOutput(self, "TheUrl",
-            value=fn_url.url
+        CfnOutput(self, "HelloLambdaUrl", value=fn_url.url)
+
+        ## The streaming lambda using Docker
+        streaming_lambda = _lambda.DockerImageFunction(
+            self,
+            "StreamingHelloHandler",
+            code=_lambda.DockerImageCode.from_image_asset("lambda/streaminghello"),
+            function_name="StreamingHelloHandler",
+            timeout=Duration.minutes(5),
         )
+
+        fn_url = streaming_lambda.add_function_url(
+            auth_type=_lambda.FunctionUrlAuthType.NONE,
+        )
+
+        CfnOutput(self, "HelloStreamingLambdaUrl", value=fn_url.url)

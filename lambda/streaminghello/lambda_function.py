@@ -4,7 +4,7 @@ import time
 
 
 @streamify_response
-def lambda_handler(event, context):
+def handler(event, context):
     response_stream = ResponseStream()
 
     for i in range(5):

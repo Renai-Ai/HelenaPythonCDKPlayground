@@ -1,11 +1,14 @@
 async function tellStory() {
-    const story = document.getElementById("topic").value;
+    const story = document.getElementById("length").value;
   
     if (story.trim().length === 0) {
       return;
     }
   
     const storyOutput = document.getElementById("story-output");
+    const percentComplete = document.getElementById("percent-complete");
+    const errorOutput = document.getElementById("error-output");
+    const rawOutput = document.getElementById("raw-output");
     storyOutput.innerText = "Thinking...";
   
     try {
@@ -15,7 +18,7 @@ async function tellStory() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ "topic": story })
+        body: JSON.stringify({ "length": story })
       });
   
       storyOutput.innerText = "";
@@ -23,7 +26,8 @@ async function tellStory() {
       // Response Body is a ReadableStream. See https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-  
+      
+
       // Process the chunks from the stream
       while (true) {
         const { done, value } = await reader.read();
@@ -31,17 +35,24 @@ async function tellStory() {
           break;
         }
         const text = decoder.decode(value);
-        storyOutput.innerText += text;
+        //rawOutput.innerText = text;
+        multipleOutputs = text.split('}{');
+        if (multipleOutputs.length === 1) 
+            json = JSON.parse(multipleOutputs[0]);
+        else 
+            json = JSON.parse("{" + multipleOutputs[multipleOutputs.length - 1]);
+        storyOutput.innerText = json.pi;
+        percentComplete.innerText = json.percentComplete;
       }
   
     } catch (error) {
-      storyOutput.innerText = `Sorry, an error happened. Please try again later. \n\n ${error}`;
+      errorOutput.innerText = `Sorry, an error happened. Please try again later. \n\n ${error} \n\n ${value}`;
     }
   
   }
   
   document.getElementById("tell-story").addEventListener("click", tellStory);
-  document.getElementById('topic').addEventListener('keydown', function (e) {
+  document.getElementById('length').addEventListener('keydown', function (e) {
     if (e.code === 'Enter') {
       tellStory();
     }

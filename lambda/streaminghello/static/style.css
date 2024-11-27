@@ -34,5 +34,7 @@ body {
   #story-output {
     width: 100%;
     overflow: auto;
+    word-wrap: break-word ;
+    font-size: xx-small;
   }
   

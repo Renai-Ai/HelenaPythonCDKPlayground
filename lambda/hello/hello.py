@@ -1,5 +1,6 @@
 import json
 
+
 def handler(event, context):
     try:
         # body = {
@@ -11,14 +12,11 @@ def handler(event, context):
         message = messageJSON.get("message")
         # content = json.loads(eventStr)
 
-
         body = {
-            "message": str(message) + " Echo from Python Lambda 2024-Oct-28",
+            "message": str(message) + " Echo from Python Lambda 2024-Nov-03",
         }
     except Exception as e:
-        body = {
-            "message": f"Error: {str(e)}"
-        }
+        body = {"message": f"Error: {str(e)}"}
 
     response = {
         "statusCode": 200,

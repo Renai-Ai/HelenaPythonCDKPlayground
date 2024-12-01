@@ -44,3 +44,25 @@ class PythonCdkStack(Stack):
             "HelloStreamingLambdaUrl",
             value=fn_url.url,
         )
+
+        ## The streaming nanoGPT lambda using Docker
+        stream_nanoGPT_lambda = _lambda.DockerImageFunction(
+            self,
+            "StreamNanoGPT",
+            code=_lambda.DockerImageCode.from_image_asset("lambda/streamNanoGPT"),
+            function_name="StreamNanoGPT",
+            timeout=Duration.minutes(5),
+            architecture=_lambda.Architecture.X86_64,
+            memory_size=3008,
+        )
+
+        fn_url = stream_nanoGPT_lambda.add_function_url(
+            auth_type=_lambda.FunctionUrlAuthType.NONE,
+            invoke_mode=_lambda.InvokeMode.RESPONSE_STREAM,
+        )
+
+        CfnOutput(
+            self,
+            "StreamNanoGPTUrl",
+            value=fn_url.url,
+        )
